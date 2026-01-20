@@ -1,0 +1,169 @@
+Date: 2026-01-12
+Project: Self-Service DevOps Platform
+Phase: Phase 1 – Manual Deployment
+
+🧩 Objective for the day
+
+Get the Next.js e-commerce application running locally and inside Docker as the foundation for cloud deployment.
+
+✅ What I completed today
+
+Selected a real production-grade app (Next.js e-commerce with Stripe & Sanity)
+
+Installed and fixed project dependencies
+
+Fixed npm peer-dependency conflicts
+
+Pinned correct versions of:
+
+React (18.2.0)
+
+React-DOM (18.2.0)
+
+Next.js (13.x)
+
+Successfully ran the app locally (npm run dev)
+
+Created a production-grade multi-stage Dockerfile
+
+Built a Docker image using Node 20
+
+Ran the app successfully inside a Docker container
+
+💥 What broke
+Problem	What happened
+npm install failed	Peer-dependency conflicts between Sanity packages
+Next.js app crashed	New React & Next versions were incompatible with the old project
+Docker build failed	Node 18 did not meet Next.js version requirement
+Dev server vs prod	npm run dev works locally but cannot be used in containers
+🔧 How I fixed it
+Problem	Fix
+npm dependency conflict	Used npm install --legacy-peer-deps
+React & Next mismatch	Forced React 18 and Next 13
+Docker build error	Switched base image to node:20-alpine
+Dev vs prod mismatch	Used npm run build + npm start in Docker
+🧠 What I learned today
+
+Modern JavaScript apps break easily when versions are not pinned
+
+npm installs newer incompatible versions by default
+
+Containers freeze runtime versions and prevent CI/CD failures
+
+Next.js must be built before running in production
+
+Docker multi-stage builds produce smaller, cleaner images
+
+🧱 Current State of Project
+
+The application is now:
+
+✔ Running locally
+Convert this into a true self-service system
+✔ Running inside Docker
+❌ Not yet in Azure
+❌ Not yet on Kubernetes
+
+📅 Day 2 — Cloud, Kubernetes & Public Internet
+
+(Today)
+
+🎯 Goal
+
+Turn that Dockerized app into a real, internet-accessible production system.
+
+☁️ Infrastructure (Terraform)
+
+You destroyed and rebuilt everything cleanly using Terraform:
+
+Azure Resource Group
+
+Azure Container Registry (ACR)
+
+Azure Kubernetes Service (AKS)
+
+You fixed:
+
+Empty Terraform state
+
+Missing subscription ID
+
+Provider authentication
+
+Azure VM size quota issues
+
+You proved:
+
+Infrastructure is 100% reproducible from code.
+
+🐳 Containers → Cloud
+
+You:
+
+Rebuilt the Docker image
+
+Tagged it
+
+Pushed it to Azure Container Registry
+
+Verified the image exists in ACR
+
+This created:
+
+A versioned, cloud-hosted runtime artifact.
+
+☸️ Kubernetes
+
+You recreated the full runtime stack:
+
+Namespace (ecommerce)
+
+Deployment (replicas of your app)
+
+Service (stable internal networking)
+
+NGINX Ingress Controller
+
+Ingress (public routing)
+
+You connected:
+
+Azure Load Balancer → NGINX → Service → Pods → Next.js
+
+🌍 Live Public Access
+
+Azure assigned a real public IP:
+
+132.220.145.224
+
+
+From your home network you opened:
+
+http://132.220.145.224
+
+
+And the ecommerce website loaded successfully.
+
+This proves:
+
+Your DevOps platform works end-to-end on the public internet.
+
+🧠 What broke & what you fixed today
+Issue	What it taught you
+Terraform showed 0 resources	Terraform state vs cloud
+AKS not visible	Subscription binding
+VM size rejected	Azure region quotas
+ACR empty	Cloud images must be pushed
+Pods stuck creating	Registry permissions
+Ingress not working on campus Wi-Fi	Real-world network filtering
+Site works on home network	Cloud platform is correct
+🧩 What you now own
+
+You have built a real application platform:
+
+Any App
+  → Docker
+  → Azure Container Registry
+  → Azure Kubernetes Service
+  → NGINX Ingress
+  → Public URL
