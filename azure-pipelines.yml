@@ -1,12 +1,28 @@
 trigger:
 - main
-stages: Build
-displayName: Build Docker Image
+variables:
+  imageName: ecommerce-app
+  acrLoginServer: ctesthoodiniprojconreg.azurecr.io
+  clusterName: example-aks1
+  resourceGroup: example-resources
+  namespace: ecommerce
+
+stages:
+- stage: Build
+  displayName: Build Docker Image
   jobs:
   - job: BuildJob
+    pool: 
+        name: agent_hoodini
     steps:
     - checkout: self
     - task: Docker@2
-      inputs: 
+      displayName: Build Image
+      inputs:
+        command: build
+        repository: $(imageName)
+        Dockerfile: ecommerce_sanity_stripe-main/Dockerfile
+        tags: latest
+- stage: Push
 
 
