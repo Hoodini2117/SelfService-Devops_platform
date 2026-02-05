@@ -1,0 +1,12 @@
+trigger:
+- main
+stages: Build
+displayName: Build Docker Image
+  jobs:
+  - job: BuildJob
+    steps:
+    - checkout: self
+    - task: Docker@2
+      inputs: 
+
+
