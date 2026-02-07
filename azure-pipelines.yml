@@ -24,5 +24,47 @@ stages:
         Dockerfile: ecommerce_sanity_stripe-main/Dockerfile
         tags: latest
 - stage: Push
+  displayName: Push image to acr
+  dependsOn: Build
+  jobs:
+    - job: PushJob
+      pool:
+          name: agent_hoodini
+      steps:
+        - task: Docker@2
+          displayName: Login to acr
+          inputs:
+            command: login
+            containerRegistry: devops-aks-acr
+        - task: Docker@2
+          displayName: Pish Image
+          inputs: 
+            command: push
+            repository: $(imageName)
+            containerRegistry: devops-aks-acr
+            tags: latest
+- stage: Deploy
+  displayName: Deplot to aks
+  dependsOn: Push
+  jobs: 
+    - job: Deployjob
+      pool: 
+          name: DeployJob
+      steps:
+      - task: AzureCLI@2
+        displayName: Deploy to Kubernetes
+        inputs: 
+        azureSubscription: devops-aks-acr
+        scriptType: bash
+        scriptLocation: inLineScript
+        inLineScript: |
+        az aks get-credentials \
+              --resource-group $(resourceGroup) \
+              --name $(clusterName) \
+              --overwrite-existing
 
+            kubectl set image deployment/ecommerce-app \
+              ecommerce-app=$(acrLoginServer)/$(imageName):latest \
+              -n $(namespace)
 
+            kubectl rollout status deployment/ecommerce-app -n $(namespace)
