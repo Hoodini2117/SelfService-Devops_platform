@@ -44,27 +44,27 @@ stages:
             containerRegistry: devops-aks-acr
             tags: latest
 - stage: Deploy
-  displayName: Deplot to aks
+  displayName: Deploy to AKS
   dependsOn: Push
-  jobs: 
-    - job: Deployjob
-      pool: 
-          name: agent_hoodini
-      steps:
-      - task: AzureCLI@2
-        displayName: Deploy to Kubernetes
-        inputs: 
+  jobs:
+  - job: DeployJob
+    pool:
+      name: agent_hoodini
+    steps:
+    - task: AzureCLI@2
+      displayName: Deploy to Kubernetes
+      inputs:
         azureSubscription: devops-aks-acr
         scriptType: bash
-        scriptLocation: inLineScript
+        scriptLocation: inlineScript
         inlineScript: |
-        az aks get-credentials \
-              --resource-group $(resourceGroup) \
-              --name $(clusterName) \
-              --overwrite-existing
+          az aks get-credentials \
+            --resource-group $(resourceGroup) \
+            --name $(clusterName) \
+            --overwrite-existing
 
-            kubectl set image deployment/ecommerce-app \
-              ecommerce-app=$(acrLoginServer)/$(imageName):latest \
-              -n $(namespace)
+          kubectl set image deployment/ecommerce-app \
+            ecommerce-app=$(acrLoginServer)/$(imageName):latest \
+            -n $(namespace)
 
-            kubectl rollout status deployment/ecommerce-app -n $(namespace)
+          kubectl rollout status deployment/ecommerce-app -n $(namespace)
