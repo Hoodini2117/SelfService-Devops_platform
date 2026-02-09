@@ -1,7 +1,7 @@
 # Phase 1 — Containerizing a Real App 
 
-*Goal: *
-Get a real production-grade web app running locally and inside Docker as the base for cloud deployment.
+** Goal: 
+Get a real production-grade web app running locally and inside Docker as the base for cloud deployment. **
 
 ### What I did:
 
@@ -65,10 +65,10 @@ Not yet on Kubernetes ❌
 
 # Phase 2 — Cloud, Kubernetes & Public Access
 
-Goal:
-Turn the Dockerized app into a real, internet-accessible system.
+** Goal:
+Turn the Dockerized app into a real, internet-accessible system. **
 
-Infrastructure (Terraform):
+### Infrastructure (Terraform):
 
 Rebuilt everything cleanly using code:
 
@@ -78,7 +78,7 @@ Azure Container Registry (ACR)
 
 Azure Kubernetes Service (AKS)
 
-Fixed:
+### Fixed:
 
 Empty Terraform state issues
 
@@ -88,7 +88,7 @@ Provider authentication
 
 Azure VM quota limitations
 
-Result:
+### Result:
 Infrastructure is fully reproducible from Terraform.
 
 Containers → Cloud
@@ -103,7 +103,7 @@ This created a versioned, cloud-hosted runtime artifact.
 
 Kubernetes Setup
 
-Created:
+### Created:
 
 Namespace
 
@@ -127,7 +127,7 @@ Opened the site from my home network
 
 The e-commerce app loaded successfully
 
-This confirmed:
+### This confirmed:
 The platform works end-to-end on the public internet.
 
 What broke (and what it taught me)
