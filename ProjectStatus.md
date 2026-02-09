@@ -3,7 +3,7 @@
 *Goal: *
 Get a real production-grade web app running locally and inside Docker as the base for cloud deployment.
 
-What I did:
+### What I did:
 
 Chose a real Next.js e-commerce app (Stripe + Sanity)
 
@@ -23,7 +23,7 @@ Wrote a production-grade multi-stage Dockerfile
 
 Built and ran the app successfully inside Docker using Node 20
 
-What broke (and why):
+### What broke (and why):
 
 npm install failed due to peer dependency conflicts
 
@@ -33,7 +33,7 @@ Docker build failed because Node 18 didn’t meet Next.js requirements
 
 npm run dev worked locally but failed in containers
 
-How I fixed it:
+### How I fixed it:
 
 Used --legacy-peer-deps to resolve npm conflicts
 
@@ -43,7 +43,7 @@ Switched Docker base image to Node 20
 
 Used proper production flow: next build + next start
 
-Key learnings:
+### Key learnings:
 
 Modern JS apps break fast if versions aren’t pinned
 
@@ -53,7 +53,7 @@ Dev mode ≠ production mode in real deployments
 
 Multi-stage Docker builds matter
 
-State after Phase 1:
+### State after Phase 1:
 
 App runs locally ✅
 
