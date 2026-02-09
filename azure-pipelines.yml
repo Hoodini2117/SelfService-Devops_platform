@@ -63,8 +63,8 @@ stages:
             --name $(clusterName) \
             --overwrite-existing
 
-          kubectl set image deployment/ecommerce-app \
+          kubectl set image deployment/ecommerce-app-green \
             ecommerce-app=$(acrLoginServer)/$(imageName):latest \
             -n $(namespace)
 
-          kubectl rollout status deployment/ecommerce-app -n $(namespace)
+          kubectl rollout status deployment/ecommerce-app-green -n $(namespace)
