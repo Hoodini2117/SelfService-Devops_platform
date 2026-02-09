@@ -63,7 +63,7 @@ Not yet in cloud ❌
 
 Not yet on Kubernetes ❌
 
-### Phase 2 — Cloud, Kubernetes & Public Access
+# Phase 2 — Cloud, Kubernetes & Public Access
 
 Goal:
 Turn the Dockerized app into a real, internet-accessible system.
