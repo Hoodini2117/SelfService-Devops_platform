@@ -1,6 +1,6 @@
-### Phase 1 — Containerizing a Real App
+** Phase 1 — Containerizing a Real App **
 
-Goal:
+*Goal: *
 Get a real production-grade web app running locally and inside Docker as the base for cloud deployment.
 
 What I did:
