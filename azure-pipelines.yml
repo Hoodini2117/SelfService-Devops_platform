@@ -20,7 +20,7 @@ stages:
       displayName: Build Image
       inputs:
         command: build
-        repository: $(imageName)
+        repository: $(acrLoginServer)/$(imageName)
         dockerfile: ecommerce_sanity_stripe-main/Dockerfile
         tags: latest
 - stage: Push
