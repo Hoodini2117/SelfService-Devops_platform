@@ -68,3 +68,18 @@ stages:
             -n $(namespace)
 
           kubectl rollout status deployment/ecommerce-app-green -n $(namespace)
+    - task: AzureCLI@2
+      displayName: switch traffic to green
+      inputs:
+        azureSubscription: devops-aks-acr
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          echo "Switching traffic to GREEN deployment"
+
+          kubectl patch svc ecommerce-service -n $(namespace) \
+           -p '{"spec":{"selector":{"app":"ecommerce","version":"green"}}}'
+
+           echo "Traffic switched to GREEN"
+
+           kubectl get endpoints ecommerce-service -n $(namespace)
