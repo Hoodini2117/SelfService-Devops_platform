@@ -145,3 +145,61 @@ Pods stuck creating → registry permissions matter
 Ingress failing on campus Wi-Fi → real networks filter traffic
 
 Works on home network → platform setup is correct
+
+# Phase 3 — Blue–Green Deployment Strategy
+Overview
+
+In Phase 3, the project implements a Blue–Green deployment strategy on Kubernetes to achieve zero-downtime releases, safe rollouts, and instant rollback capability.
+
+This phase focuses on decoupling deployment from traffic routing, which is a core requirement for building a reliable, self-service DevOps platform.
+
+### What is Blue–Green Deployment?
+Blue–Green deployment runs two identical environments in parallel:
+
+Blue — the stable production version
+
+Green — the new version being deployed
+
+Only one environment receives live traffic at a time, eliminating downtime and reducing release risk.
+How It Works in This Project
+Parallel Deployments
+
+Two Kubernetes Deployments run simultaneously:
+
+ecommerce-app-blue
+ecommerce-app-green
+
+They are identical except for a version label:
+```bash
+app: ecommerce
+version: blue | green 
+``` 
+### Traffic Control via Service
+
+A single Kubernetes Service routes traffic based on labels.
+Example: routing traffic to Green
+```bash
+selector:
+  app: ecommerce
+  version: green
+```
+Updating the Service selector switches traffic instantly without restarting Pods.
+
+### Instant Rollback
+
+If an issue occurs, traffic can be switched back to Blue by updating the Service selector. Rollback is immediate and does not require redeployment.
+
+### Why This Matters
+
+This phase demonstrates:
+
+Zero-downtime deployments
+
+Safe CI/CD-driven releases
+
+Instant rollback capability
+
+Production-grade Kubernetes traffic management
+
+Blue–Green deployment forms the foundation for automating safe releases in the self-service DevOps platform.
+
