@@ -1,169 +1,147 @@
-Date: 2026-01-12
-Project: Self-Service DevOps Platform
-Phase: Phase 1 – Manual Deployment
+### Phase 1 — Containerizing a Real App
 
-🧩 Objective for the day
+Goal:
+Get a real production-grade web app running locally and inside Docker as the base for cloud deployment.
 
-Get the Next.js e-commerce application running locally and inside Docker as the foundation for cloud deployment.
+What I did:
 
-✅ What I completed today
+Chose a real Next.js e-commerce app (Stripe + Sanity)
 
-Selected a real production-grade app (Next.js e-commerce with Stripe & Sanity)
+Fixed broken dependencies and peer conflicts
 
-Installed and fixed project dependencies
+Pinned stable versions:
 
-Fixed npm peer-dependency conflicts
+React 18.2
 
-Pinned correct versions of:
+React-DOM 18.2
 
-React (18.2.0)
+Next.js 13
 
-React-DOM (18.2.0)
+Got the app running locally
 
-Next.js (13.x)
+Wrote a production-grade multi-stage Dockerfile
 
-Successfully ran the app locally (npm run dev)
+Built and ran the app successfully inside Docker using Node 20
 
-Created a production-grade multi-stage Dockerfile
+What broke (and why):
 
-Built a Docker image using Node 20
+npm install failed due to peer dependency conflicts
 
-Ran the app successfully inside a Docker container
+App crashed because modern React/Next versions didn’t match the old codebase
 
-💥 What broke
-Problem	What happened
-npm install failed	Peer-dependency conflicts between Sanity packages
-Next.js app crashed	New React & Next versions were incompatible with the old project
-Docker build failed	Node 18 did not meet Next.js version requirement
-Dev server vs prod	npm run dev works locally but cannot be used in containers
-🔧 How I fixed it
-Problem	Fix
-npm dependency conflict	Used npm install --legacy-peer-deps
-React & Next mismatch	Forced React 18 and Next 13
-Docker build error	Switched base image to node:20-alpine
-Dev vs prod mismatch	Used npm run build + npm start in Docker
-🧠 What I learned today
+Docker build failed because Node 18 didn’t meet Next.js requirements
 
-Modern JavaScript apps break easily when versions are not pinned
+npm run dev worked locally but failed in containers
 
-npm installs newer incompatible versions by default
+How I fixed it:
 
-Containers freeze runtime versions and prevent CI/CD failures
+Used --legacy-peer-deps to resolve npm conflicts
 
-Next.js must be built before running in production
+Forced compatible React + Next versions
 
-Docker multi-stage builds produce smaller, cleaner images
+Switched Docker base image to Node 20
 
-🧱 Current State of Project
+Used proper production flow: next build + next start
 
-The application is now:
+Key learnings:
 
-✔ Running locally
-Convert this into a true self-service system
-✔ Running inside Docker
-❌ Not yet in Azure
-❌ Not yet on Kubernetes
+Modern JS apps break fast if versions aren’t pinned
 
-📅 Day 2 — Cloud, Kubernetes & Public Internet
+Containers freeze runtime versions and prevent CI/CD surprises
 
-(Today)
+Dev mode ≠ production mode in real deployments
 
-🎯 Goal
+Multi-stage Docker builds matter
 
-Turn that Dockerized app into a real, internet-accessible production system.
+State after Phase 1:
 
-☁️ Infrastructure (Terraform)
+App runs locally ✅
 
-You destroyed and rebuilt everything cleanly using Terraform:
+App runs in Docker ✅
 
-Azure Resource Group
+Not yet in cloud ❌
+
+Not yet on Kubernetes ❌
+
+### Phase 2 — Cloud, Kubernetes & Public Access
+
+Goal:
+Turn the Dockerized app into a real, internet-accessible system.
+
+Infrastructure (Terraform):
+
+Rebuilt everything cleanly using code:
+
+Resource Group
 
 Azure Container Registry (ACR)
 
 Azure Kubernetes Service (AKS)
 
-You fixed:
+Fixed:
 
-Empty Terraform state
+Empty Terraform state issues
 
-Missing subscription ID
+Missing subscription binding
 
 Provider authentication
 
-Azure VM size quota issues
+Azure VM quota limitations
 
-You proved:
+Result:
+Infrastructure is fully reproducible from Terraform.
 
-Infrastructure is 100% reproducible from code.
-
-🐳 Containers → Cloud
-
-You:
+Containers → Cloud
 
 Rebuilt the Docker image
 
-Tagged it
+Tagged and pushed it to ACR
 
-Pushed it to Azure Container Registry
+Verified the image exists in the registry
 
-Verified the image exists in ACR
+This created a versioned, cloud-hosted runtime artifact.
 
-This created:
+Kubernetes Setup
 
-A versioned, cloud-hosted runtime artifact.
+Created:
 
-☸️ Kubernetes
+Namespace
 
-You recreated the full runtime stack:
+Deployment (replicas)
 
-Namespace (ecommerce)
-
-Deployment (replicas of your app)
-
-Service (stable internal networking)
+Service
 
 NGINX Ingress Controller
 
-Ingress (public routing)
+Ingress rules
 
-You connected:
+Wired the full request path:
 
-Azure Load Balancer → NGINX → Service → Pods → Next.js
+Azure Load Balancer → NGINX → Service → Pods → App
 
-🌍 Live Public Access
+Live on the Internet
 
-Azure assigned a real public IP:
+Azure assigned a public IP
 
-132.220.145.224
+Opened the site from my home network
 
+The e-commerce app loaded successfully
 
-From your home network you opened:
+This confirmed:
+The platform works end-to-end on the public internet.
 
-http://132.220.145.224
+What broke (and what it taught me)
 
+Terraform showing 0 resources → state vs actual infra matters
 
-And the ecommerce website loaded successfully.
+AKS not visible → subscription context is critical
 
-This proves:
+VM size rejected → regional quota constraints are real
 
-Your DevOps platform works end-to-end on the public internet.
+Empty ACR → images must be explicitly pushed
 
-🧠 What broke & what you fixed today
-Issue	What it taught you
-Terraform showed 0 resources	Terraform state vs cloud
-AKS not visible	Subscription binding
-VM size rejected	Azure region quotas
-ACR empty	Cloud images must be pushed
-Pods stuck creating	Registry permissions
-Ingress not working on campus Wi-Fi	Real-world network filtering
-Site works on home network	Cloud platform is correct
-🧩 What you now own
+Pods stuck creating → registry permissions matter
 
-You have built a real application platform:
+Ingress failing on campus Wi-Fi → real networks filter traffic
 
-Any App
-  → Docker
-  → Azure Container Registry
-  → Azure Kubernetes Service
-  → NGINX Ingress
-  → Public URL
+Works on home network → platform setup is correct
