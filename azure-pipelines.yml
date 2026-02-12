@@ -1,5 +1,6 @@
 trigger:
 - main
+
 variables:
   imageName: ecommerce-app
   acrLoginServer: ctesthoodiniprojconreg.azurecr.io
@@ -7,13 +8,16 @@ variables:
   resourceGroup: example-resources
   namespace: ecommerce
 
+
+# BUILD IMAGE
+
 stages:
 - stage: Build
   displayName: Build Docker Image
   jobs:
   - job: BuildJob
-    pool: 
-        name: agent_hoodini
+    pool:
+      name: agent_hoodini
     steps:
     - checkout: self
     - task: Docker@2
@@ -23,53 +27,114 @@ stages:
         repository: $(acrLoginServer)/$(imageName)
         dockerfile: ecommerce_sanity_stripe-main/Dockerfile
         tags: latest
+
+# PUSH IMAGE TO ACR
+
 - stage: Push
-  displayName: Push image to acr
+  displayName: Push Image to ACR
   dependsOn: Build
   jobs:
-    - job: PushJob
-      pool:
-          name: agent_hoodini
-      steps:
-        - task: Docker@2
-          displayName: Login to acr
-          inputs:
-            command: login
-            containerRegistry: acr-docker-conn
-        - task: Docker@2
-          displayName: Push Image
-          inputs: 
-            command: push
-            repository: $(imageName)
-            containerRegistry: acr-docker-conn
-            tags: latest
-- stage: Deploy
-  displayName: Deploy to AKS
+  - job: PushJob
+    pool:
+      name: agent_hoodini
+    steps:
+    - task: Docker@2
+      displayName: Login to ACR
+      inputs:
+        command: login
+        containerRegistry: acr-docker-conn
+
+    - task: Docker@2
+      displayName: Push Image
+      inputs:
+        command: push
+        repository: $(imageName)
+        containerRegistry: acr-docker-conn
+        tags: latest
+
+# DEPLOY TO GREEN (NO TRAFFIC YET)
+
+- stage: DeployGreen
+  displayName: Deploy to GREEN Environment
   dependsOn: Push
   jobs:
-  - job: DeployJob
+  - job: DeployGreenJob
     pool:
       name: agent_hoodini
     steps:
     - task: AzureCLI@2
-      displayName: Deploy to Kubernetes
+      displayName: Update GREEN Deployment
       inputs:
         azureSubscription: devops-aks-acr
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
+          echo "Connecting to AKS"
           az aks get-credentials \
             --resource-group $(resourceGroup) \
             --name $(clusterName) \
             --overwrite-existing
 
+          echo "Deploying new version to GREEN"
           kubectl set image deployment/ecommerce-app-green \
-            ecommerce-app=$(acrLoginServer)/$(imageName):latest \
+            ecommerce=$(acrLoginServer)/$(imageName):latest \
             -n $(namespace)
 
           kubectl rollout status deployment/ecommerce-app-green -n $(namespace)
+
+
+# VALIDATE GREEN
+
+- stage: ValidateGreen
+  displayName: Validate GREEN Deployment
+  dependsOn: DeployGreen
+  jobs:
+  - job: ValidateJob
+    pool:
+      name: agent_hoodini
+    steps:
     - task: AzureCLI@2
-      displayName: switch traffic to green
+      displayName: Health Check GREEN
+      inputs:
+        azureSubscription: devops-aks-acr
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          echo "Checking GREEN pods"
+          kubectl get pods -l version=green -n $(namespace)
+
+          echo "Checking rollout"
+          kubectl rollout status deployment/ecommerce-app-green -n $(namespace)
+
+
+# APPROVAL + SWITCH TRAFFIC
+
+- stage: PromoteToGreen
+  displayName: Promote GREEN to Production
+  dependsOn: ValidateGreen
+  jobs:
+
+  #  Approval Job (Agentless)
+  - job: WaitForApproval
+    displayName: Await Manual Approval
+    pool: server
+    steps:
+    - task: ManualValidation@0
+      timeoutInMinutes: 1440
+      inputs:
+        instructions: "Verify GREEN deployment before switching traffic."
+        notifyUsers: ''
+        onTimeout: reject
+
+  #  Switch Job (Runs on your self-hosted agent)
+  - job: SwitchTraffic
+    displayName: Switch Traffic to GREEN
+    dependsOn: WaitForApproval
+    pool:
+      name: agent_hoodini
+    steps:
+    - task: AzureCLI@2
+      displayName: Switch Traffic to GREEN
       inputs:
         azureSubscription: devops-aks-acr
         scriptType: bash
@@ -77,9 +142,38 @@ stages:
         inlineScript: |
           echo "Switching traffic to GREEN deployment"
 
+          az aks get-credentials \
+            --resource-group $(resourceGroup) \
+            --name $(clusterName) \
+            --overwrite-existing
+
           kubectl patch svc ecommerce-service -n $(namespace) \
            -p '{"spec":{"selector":{"app":"ecommerce","version":"green"}}}'
 
-           echo "Traffic switched to GREEN"
+          echo "Traffic successfully switched"
+          kubectl get endpoints ecommerce-service -n $(namespace)
 
-           kubectl get endpoints ecommerce-service -n $(namespace)
+
+
+# OPTIONAL ROLLBACK STAGE
+
+- stage: RollbackToBlue
+  displayName: Rollback to BLUE (Manual Use)
+  condition: false   
+  jobs:
+  - job: RollbackJob
+    pool:
+      name: agent_hoodini
+    steps:
+    - task: AzureCLI@2
+      displayName: Rollback Traffic to BLUE
+      inputs:
+        azureSubscription: devops-aks-acr
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          echo "Rolling back to BLUE"
+          kubectl patch svc ecommerce-service -n $(namespace) \
+           -p '{"spec":{"selector":{"app":"ecommerce","version":"blue"}}}'
+
+          echo "Rollback complete"
