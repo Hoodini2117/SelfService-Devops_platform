@@ -202,4 +202,51 @@ Instant rollback capability
 Production-grade Kubernetes traffic management
 
 Blue–Green deployment forms the foundation for automating safe releases in the self-service DevOps platform.
+### Installed NGINX Ingress Controller
+
+AKS does not expose applications by default, so I installed an NGINX Ingress Controller using Helm to provide a public IP and route traffic to the service.
+
+This gave a stable entry point:
+
+Public IP → Ingress → Service → Blue/Green Pods
+
+### Modified Azure DevOps Pipeline to Support Blue-Green Workflow
+
+I redesigned the CI/CD pipeline to follow a controlled promotion model:
+
+-Deploy updates only to Green
+-Wait for validation
+-Use kubectl patch service to switch traffic instantly
+-Keep Blue untouched for rollback
+### a lot of challenges were to be faced this time
+- Main problem was my azure account which i had to reconfigure as due to some circumstances old account was unavailable.
+
+- reconfigured all the aks - acr - service connections - agent pools to work with the new azurea ccount.
+
+-VM SKU and vCPU Quota Errors During AKS Creation Caused by switching accounts fixed by requesting 4 bs2_v2 cpu's.
+
+-git repo was not tracked correctly so had to reconfigure it whole.
+
+-ManualValidation Task Error in Pipeline
+
+Azure DevOps requires approval tasks to run in an agentless job.
+I split the stage into:
+
+Server job → waits for approval
+
+Agent job → performs the traffic switch
+
+-Ingress Controller Was Not Installed After Rebuild
+
+Terraform does not install ingress automatically, so routing initially failed.
+I installed it manually using Helm and reapplied ingress rules.
+
+### What I Achieved by the End of This Phase
+
+✔ Implemented production-style Blue-Green deployment
+✔ Achieved zero-downtime releases
+✔ Enabled instant rollback capability
+✔ Built a controlled promotion workflow in Azure DevOps
+✔ Validated separation of infrastructure (Terraform) and delivery (CI/CD)
+✔ Created a safer release model aligned with real-world DevOps practices
 
