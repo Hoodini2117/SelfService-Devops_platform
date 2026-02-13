@@ -7,7 +7,6 @@ spec:
   type: ClusterIP
   selector:
     app: ecommerce
-    version: blue
   ports:
     - port: 80
       targetPort: 3000
