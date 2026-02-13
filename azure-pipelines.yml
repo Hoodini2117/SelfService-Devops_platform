@@ -129,7 +129,9 @@ stages:
 
 - stage: Validate
   displayName: Validate Current Env Deployment
-  dependsOn: Deploy
+  dependsOn:
+    - Deploy
+    - DetectEnv
   variables:
     targetEnv: $[ stageDependencies.DetectEnv.DetectJob.outputs['setTarget.targetEnv'] ]
   jobs:
