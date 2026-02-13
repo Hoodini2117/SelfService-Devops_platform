@@ -197,12 +197,25 @@ stages:
             --resource-group $(resourceGroup) \
             --name $(clusterName) \
             --overwrite-existing
+          echo "DEBUG: targetEnv=$(targetEnv)"
+
+          #  SAFETY CHECK
+
+          if [ -z "$(targetEnv)" ]; then
+            echo "ERROR: targetEnv is empty. Aborting traffic switch."
+            exit 1
+          fi
+
+          echo "switchin traffic to $(targetEnv)"
 
           kubectl patch svc ecommerce-service -n $(namespace) \
           -p "{\"spec\":{\"selector\":{\"app\":\"ecommerce\",\"version\":\"$(targetEnv)\"}}}"
 
           echo "Traffic successfully switched"
+
           kubectl get endpoints ecommerce-service -n $(namespace)
+          kubectl get svc ecommerce-service -n $(namespace) -o jsonpath='{.spec.selector}'
+
 
 
 
