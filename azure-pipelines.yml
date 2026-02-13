@@ -199,7 +199,7 @@ stages:
             --overwrite-existing
 
           kubectl patch svc ecommerce-service -n $(namespace) \
-           -p '{"spec":{"selector":{"app":"ecommerce","version":"$(targetEnv)"}}}'
+          -p "{\"spec\":{\"selector\":{\"app\":\"ecommerce\",\"version\":\"$(targetEnv)\"}}}"
 
           echo "Traffic successfully switched"
           kubectl get endpoints ecommerce-service -n $(namespace)
