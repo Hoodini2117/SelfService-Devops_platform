@@ -87,6 +87,9 @@ stages:
 
             echo "Target Deployment: $TARGET"
 
+            echo "DEBUG TARGET inside Detect stage = $TARGET"
+
+
             echo "##vso[task.setvariable variable=targetEnv;isOutput=true]$TARGET"
 
 - stage: Deploy
@@ -106,6 +109,8 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
+          echo "DEBUG targetEnv in this stage = $(targetEnv)"
+
           echo "Connecting to AKS"
           az aks get-credentials \
             --resource-group $(resourceGroup) \
