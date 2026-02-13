@@ -7,6 +7,7 @@ variables:
   clusterName: example-aks1
   resourceGroup: example-resources
   namespace: ecommerce
+  imageTag: Build.BuildID
 
 
 # BUILD IMAGE
@@ -26,7 +27,7 @@ stages:
         command: build
         repository: $(acrLoginServer)/$(imageName)
         dockerfile: ecommerce_sanity_stripe-main/Dockerfile
-        tags: latest
+        tags: $(imageTag)
 
 # PUSH IMAGE TO ACR
 
@@ -50,7 +51,7 @@ stages:
         command: push
         repository: $(imageName)
         containerRegistry: acr-docker-conn
-        tags: latest
+        tags: $(imageTag)
 
 # DEPLOY TO GREEN (NO TRAFFIC YET)
 
@@ -77,7 +78,7 @@ stages:
 
           echo "Deploying new version to GREEN"
           kubectl set image deployment/ecommerce-app-green \
-            ecommerce=$(acrLoginServer)/$(imageName):latest \
+            ecommerce=$(acrLoginServer)/$(imageName):$(imageTag) \
             -n $(namespace)
 
           kubectl rollout status deployment/ecommerce-app-green -n $(namespace)
