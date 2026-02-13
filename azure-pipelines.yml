@@ -7,7 +7,7 @@ variables:
   clusterName: example-aks1
   resourceGroup: example-resources
   namespace: ecommerce
-  imageTag: Build.BuildID
+  imageTag: $(Build.BuildID)
 
 
 # BUILD IMAGE
