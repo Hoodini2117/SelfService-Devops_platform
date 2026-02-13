@@ -250,3 +250,8 @@ I installed it manually using Helm and reapplied ingress rules.
 ✔ Validated separation of infrastructure (Terraform) and delivery (CI/CD)
 ✔ Created a safer release model aligned with real-world DevOps practices
 
+to complete the fully automated blue-green deployment..we needed to make some changes and add some features as well. In them ,there were :-
+- a unique image tag for each build so that we can build green using this tag and blue will remain untouched with the previous tag, this ensures versions are traceable.
+- automated validation - currently validation is being done manually. To be called truly self - service we need to automate this process, 
+- rollback - currently rollback is manual. To counter this we will add an automated rollback if and ever validation fails. This will be fairly  simple as blue is active and we just need to switch the selector.
+
