@@ -88,6 +88,8 @@ stages:
             echo "Target Deployment: $TARGET"
 
             echo "DEBUG TARGET inside Detect stage = $TARGET"
+            kubectl get svc ecommerce-service -n $(namespace) -o yaml
+
 
 
             echo "##vso[task.setvariable variable=targetEnv;isOutput=true]$TARGET"
