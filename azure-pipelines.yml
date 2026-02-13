@@ -63,6 +63,7 @@ stages:
         name: agent_hoodini
       steps:
       - task: AzureCLI@2
+        name: setTarget
         displayName: detect current live environment(ie. blue or green)
         inputs:
           azureSubscription: devops-aks-acr
@@ -92,7 +93,7 @@ stages:
   displayName: Deploy to current environment
   dependsOn: DetectEnv
   variables:
-    targetEnv: $[ stageDependencies.DetectEnv.DetectJob.outputs['DetectJob.targetEnv'] ]
+    targetEnv: $[ stageDependencies.DetectEnv.DetectJob.outputs['setTarget.targetEnv'] ]
   jobs:
   - job: DeployJob
     pool:
@@ -125,7 +126,7 @@ stages:
   displayName: Validate Current Env Deployment
   dependsOn: Deploy
   variables:
-    targetEnv: $[ stageDependencies.DetectEnv.DetectJob.outputs['DetectJob.targetEnv'] ]
+    targetEnv: $[ stageDependencies.DetectEnv.DetectJob.outputs['setTarget.targetEnv'] ]
   jobs:
   - job: ValidateJob
     pool:
@@ -151,7 +152,7 @@ stages:
   displayName: Promote target to Production
   dependsOn: Validate
   variables:
-    targetEnv: $[ stageDependencies.DetectEnv.DetectJob.outputs['DetectJob.targetEnv'] ]
+    targetEnv: $[ stageDependencies.DetectEnv.DetectJob.outputs['setTarget.targetEnv'] ]
 
   jobs:
 
