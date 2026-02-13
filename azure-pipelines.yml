@@ -140,12 +140,15 @@ stages:
       name: agent_hoodini
     steps:
     - task: AzureCLI@2
+      name: ForwardTarget
       displayName: Health Check Current Env
       inputs:
         azureSubscription: devops-aks-acr
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
+          echo "##vso[task.setvariable variable=targetEnv;isOutput=true]$(targetEnv)"
+
           echo "DEBUG: targetEnv=$(targetEnv)"
 
           echo "Checking current pods"
@@ -161,8 +164,8 @@ stages:
   displayName: Promote target to Production
   dependsOn: Validate
   variables:
-    targetEnv: $[ stageDependencies.DetectEnv.DetectJob.outputs['setTarget.targetEnv'] ]
-
+    targetEnv: $[ stageDependencies.Validate.ValidateJob.outputs['ForwardTarget.targetEnv'] ]
+    
   jobs:
 
   #  Approval Job (Agentless)
