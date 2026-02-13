@@ -139,6 +139,8 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
+          echo "DEBUG: targetEnv=$(targetEnv)"
+
           echo "Checking current pods"
           kubectl get pods -l version=$(targetEnv) -n $(namespace)
 
