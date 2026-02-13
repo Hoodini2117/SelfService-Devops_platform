@@ -165,27 +165,14 @@ stages:
 - stage: Promote
   displayName: Promote target to Production
   dependsOn: Validate
+  condition: succeeded()
   variables:
     targetEnv: $[ stageDependencies.Validate.ValidateJob.outputs['ForwardTarget.targetEnv'] ]
     
   jobs:
-
-  #  Approval Job (Agentless)
-  - job: WaitForApproval
-    displayName: Await Manual Approval
-    pool: server
-    steps:
-    - task: ManualValidation@0
-      timeoutInMinutes: 1440
-      inputs:
-        instructions: "Verify target deployment before switching traffic."
-        notifyUsers: ''
-        onTimeout: reject
-
   #  Switch Job (Runs on your self-hosted agent)
   - job: SwitchTraffic
     displayName: Switch Traffic to target
-    dependsOn: WaitForApproval
     pool:
       name: agent_hoodini
     steps:
@@ -196,7 +183,7 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          echo "Switching traffic to target deployment"
+          echo "connection to aks..."
 
           az aks get-credentials \
             --resource-group $(resourceGroup) \
@@ -211,7 +198,7 @@ stages:
             exit 1
           fi
 
-          echo "switchin traffic to $(targetEnv)"
+          echo "auto promoting $(targetEnv)"
 
           kubectl patch svc ecommerce-service -n $(namespace) \
           -p "{\"spec\":{\"selector\":{\"app\":\"ecommerce\",\"version\":\"$(targetEnv)\"}}}"
