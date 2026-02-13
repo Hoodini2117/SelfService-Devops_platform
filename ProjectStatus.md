@@ -255,3 +255,158 @@ to complete the fully automated blue-green deployment..we needed to make some ch
 - automated validation - currently validation is being done manually. To be called truly self - service we need to automate this process, 
 - rollback - currently rollback is manual. To counter this we will add an automated rollback if and ever validation fails. This will be fairly  simple as blue is active and we just need to switch the selector.
 
+Errors & Problems I Faced
+
+This is where i learned most of the stuff...as learning from errors is better than having everything work on one go which is imppossible.
+
+### 1. Service Selector Corruption (version="")
+
+At one point, my Promote stage ran when targetEnv was empty.
+
+This patched the service like this:
+
+version: ""
+
+
+Kubernetes accepted it.
+
+Pipeline didn’t fail.
+
+But detection completely broke.
+
+ Symptom:
+Live environment :
+
+
+(blank)
+
+Fix:
+
+Added safety check before patch:
+
+if [ -z "$(targetEnv)" ]; then exit 1
+
+
+Manually repaired service selector.
+
+This taught me:
+
+Kubernetes accepts empty strings silently — pipelines must guard against bad state.
+
+### 2. Variable Not Propagating Between Stages
+
+Azure DevOps output variables didn’t automatically flow across multiple stages.
+
+Deploy stage worked.
+Promote stage didn’t receive targetEnv.
+
+ Root Cause:
+
+Output variables are stage-scoped.
+
+Fix:
+
+Forwarded targetEnv stage-by-stage using:
+
+##vso[task.setvariable variable=targetEnv;isOutput=true]
+
+
+This was a major Azure DevOps learning moment.
+
+### 3. Bash Syntax Error
+
+I accidentally wrote:
+
+TARGET = "blue"
+
+
+Instead of:
+
+TARGET="blue"
+
+
+That small space corrupted the variable and even produced:
+
+
+###  4. Service YAML vs Cluster State Confusion
+
+I fixed the service in the cluster manually, but forgot to update service.yaml in Git.
+
+Later, when applying YAML again, it removed version from selector.
+
+This caused version detection to break again.
+
+ Fix:
+
+Updated service.yaml permanently to include:
+```bash
+selector:
+  app: ecommerce
+  version: blue
+```
+
+This stabilized the architecture.
+
+Major lesson:
+
+Git desired state must match cluster structure.
+
+### 5. Old Deployment Interference
+
+Initially I still had:
+
+ecommerce-app
+
+
+Running without version label.
+
+Service was routing to all deployments.
+
+This made Blue–Green meaningless.
+
+### Fix:
+
+Deleted old deployment.
+Kept only blue and green.
+
+Lesson:
+
+Blue–Green must be structurally isolated.
+
+### Final Stable Flow
+
+After all fixes, my pipeline now does:
+
+Detect live environment
+
+Deploy to idle environment
+
+Validate rollout
+
+Automatically promote (no manual gate)
+
+Patch service selector safely
+
+Verify switch
+
+Now the flow is:
+```bash
+Git push → zero-downtime production release
+```
+
+And alternation works correctly:
+
+Blue → Green → Blue → Green
+
+### What I Really Learned
+
+This wasn’t just about Blue–Green.
+I learned:
+
+Kubernetes service selector behavior
+How fragile label-based routing can be
+Azure DevOps output variable scoping
+Why safety guards are mandatory
+How silent failures happen in CI/CD
+Why infra YAML and runtime state must align
+How small Bash mistakes can break production logic
