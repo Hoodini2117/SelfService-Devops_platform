@@ -14,20 +14,29 @@ variables:
 
 stages:
 - stage: Build
-  displayName: Build Docker Image
+  displayName: Build using buildpacks
   jobs:
   - job: BuildJob
     pool:
       name: agent_hoodini
     steps:
     - checkout: self
-    - task: Docker@2
-      displayName: Build Image
+    - task: AzureCLI@2
+      displayName: Build Image using buildpacks
       inputs:
-        command: build
-        repository: $(acrLoginServer)/$(imageName)
-        dockerfile: ecommerce_sanity_stripe-main/Dockerfile
-        tags: $(imageTag)
+        azureSubscription: devops-aks-acr
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          echo "Starting Buildpack build..."
+
+          echo "Image name: $(acrLoginServer)/$(imageName):$(imageTag)"
+
+          pack build $(acrLoginServer)/$(imageName):$(imageTag) \
+            --builder paketobuildpacks/builder-jammy-base \
+            --path .
+
+          echo "Buildpack build completed.")
 
 # PUSH IMAGE TO ACR
 
