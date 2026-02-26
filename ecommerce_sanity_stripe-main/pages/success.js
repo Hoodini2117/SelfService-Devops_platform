@@ -41,3 +41,6 @@ const Success = () => {
 }
 
 export default Success
+export async function getServerSideProps() {
+  return { props: {} };
+}
