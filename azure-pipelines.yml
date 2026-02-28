@@ -38,7 +38,7 @@ stages:
 
           pack build $(acrLoginServer)/$(imageName):$(imageTag) \
             --builder paketobuildpacks/builder-jammy-base \
-            --path ecommerce_sanity_stripe-main
+            --path ecommerce_sanity_stripe-main \
             --clear-cache
 
           echo "Buildpack build completed."
