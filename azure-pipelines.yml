@@ -39,6 +39,7 @@ stages:
           pack build $(acrLoginServer)/$(imageName):$(imageTag) \
             --builder paketobuildpacks/builder-jammy-base \
             --path ecommerce_sanity_stripe-main
+            --clear-cache
 
           echo "Buildpack build completed."
 
@@ -90,6 +91,7 @@ stages:
               --overwrite-existing
 
             LIVE=$(kubectl get svc ecommerce-service -n $(namespace) -o jsonpath='{.spec.selector.version}')
+            
             echo "Live environment : $LIVE"
 
             if [ "$LIVE" = "blue" ]; then 
@@ -243,7 +245,13 @@ stages:
         inlineScript: |
           echo "Rolling back to previous "
           kubectl patch svc ecommerce-service -n $(namespace) \
-           -p '{"spec":{"selector":{"app":"ecommerce","version":"$(imageTag)"}})}'
+           -p '{"spec":{"selector":{"app":"ecommerce","version":"$(imageTag)"}}}'
            
 
           echo "Rollback complete"
+          if ! kubectl rollout status deployment/ecommerce-app-$(targetEnv) -n $(namespace); then
+            echo "Rollout failed. Dumping pod info..."
+            kubectl get pods -n $(namespace)
+            kubectl describe deployment ecommerce-app-$(targetEnv) -n $(namespace)
+            exit 1
+          fi
