@@ -29,6 +29,8 @@ stages:
         scriptLocation: inlineScript
         inlineScript: |
           echo "Starting Buildpack build..."
+          export NODE_ENV=production
+          echo "NODE_ENV forced to $NODE_ENV"
           echo "Current directory:"
           pwd
           echo "Contents:"
