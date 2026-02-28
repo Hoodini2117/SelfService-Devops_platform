@@ -29,6 +29,10 @@ stages:
         scriptLocation: inlineScript
         inlineScript: |
           echo "Starting Buildpack build..."
+          echo "Current directory:"
+          pwd
+          echo "Contents:"
+          ls -la
 
           echo "Image name: $(acrLoginServer)/$(imageName):$(imageTag)"
 
