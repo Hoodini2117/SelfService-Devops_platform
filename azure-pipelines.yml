@@ -41,7 +41,7 @@ stages:
           pack build $(acrLoginServer)/$(imageName):$(imageTag) \
             --builder paketobuildpacks/builder-jammy-base \
             --path ecommerce_sanity_stripe-main \
-            --clear-cache
+            --env NODE_ENV=production
           
           echo "Buildpack build completed."
       env:
