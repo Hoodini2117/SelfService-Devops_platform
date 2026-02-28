@@ -1,1 +1,63 @@
+# =========================
+# NODE / NEXT
+# =========================
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# ENV FILES (VERY IMPORTANT)
+# =========================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# =========================
+# SANITY (separate project)
+# =========================
+sanity_ecommerce/
+
+# =========================
+# OS FILES
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDE / EDITOR
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# AZURE DEVOPS AGENT ARTIFACTS
+# =========================
+.azure/
+_*
+coverage/
+
+# =========================
+# TERRAFORM (IMPORTANT)
+# =========================
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/.terraform.lock.hcl
+
+# =========================
+# DOCKER (if added later)
+# =========================
+.dockerignore
 sanity_ecommerce/
