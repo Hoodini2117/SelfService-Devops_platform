@@ -40,7 +40,11 @@ stages:
             --builder paketobuildpacks/builder-jammy-base \
             --path ecommerce_sanity_stripe-main \
             --clear-cache
-
+          env:
+            NEXT_PUBLIC_SANITY_PROJECT_ID: $(SANITY_PROJECT_ID)
+            NEXT_PUBLIC_SANITY_DATASET: $(SANITY_DATASET)
+            SANITY_API_TOKEN: $(SANITY_API_TOKEN)
+            STRIPE_SECRET_KEY: $(STRIPE_SECRET_KEY)
           echo "Buildpack build completed."
 
 # PUSH IMAGE TO ACR
